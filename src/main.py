@@ -2,6 +2,7 @@ import arcade
 
 import GameView
 
+
 def main():
     """
     Main entry point for the Twisted Towers game.
@@ -10,7 +11,9 @@ def main():
     """
     window = GameView.GameView()
     window.setup()
+
     arcade.run()
+
 
 if __name__ == "__main__":
     main()
