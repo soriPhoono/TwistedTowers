@@ -27,6 +27,8 @@ class GameView(arcade.Window):
             ":resources:sounds/coin1.wav")
         self.jump_sound = arcade.load_sound(":resources:sounds/jump1.wav")
 
+        self.scene = None
+
         self.player_sprite = None
         self.player_list = None
         self.platform_list = None
@@ -50,35 +52,35 @@ class GameView(arcade.Window):
         None
         """
 
+        self.scene = arcade.Scene()
+
         self.player_sprite = arcade.Sprite(
             ":resources:images/animated_characters/female_adventurer/femaleAdventurer_idle.png")
         self.player_sprite.center_x = 64
         self.player_sprite.center_y = 128
+        self.scene.add_sprite("Player", self.player_sprite)
 
-        self.player_list = arcade.SpriteList()
-        self.player_list.append(self.player_sprite)
-
-        self.platform_list = arcade.SpriteList(use_spatial_hash=True)
+        self.scene.add_sprite_list("Platforms", use_spatial_hash=True)
         for x in range(0, 1250, 64):
             platform = arcade.Sprite(
                 ":resources:images/tiles/grassMid.png", scale=TILE_SCALE)
             platform.center_x = x
             platform.center_y = 32
-            self.platform_list.append(platform)
+            self.scene.get_sprite_list("Platforms").append(platform)
 
-        self.wall_list = arcade.SpriteList(use_spatial_hash=True)
+        self.scene.add_sprite_list("Boxes", use_spatial_hash=True)
         box_coordinates = [[512, 96], [256, 96], [768, 96]]
         for coordinate in box_coordinates:
             wall = arcade.Sprite(
                 ":resources:images/tiles/boxCrate_double.png", scale=TILE_SCALE
             )
             wall.position = coordinate
-            self.wall_list.append(wall)
+            self.scene.get_sprite_list("Boxes").append(wall)
 
-        self.coin_list = arcade.SpriteList(use_spatial_hash=True)
+        self.scene.add_sprite_list("Coins", use_spatial_hash=True)
 
         self.physics_engine = arcade.PhysicsEnginePlatformer(
-            self.player_sprite, self.platform_list, walls=self.wall_list
+            self.player_sprite, self.scene.get_sprite_list("Platforms"), walls=self.scene.get_sprite_list("Boxes")
         )
 
         self.camera = arcade.Camera2D()
@@ -123,7 +125,7 @@ class GameView(arcade.Window):
         self.physics_engine.update()
 
         coin_hit_list = arcade.check_for_collision_with_list(
-            self.player_sprite, self.coin_list
+            self.player_sprite, self.scene.get_sprite_list("Coins")
         )
 
         for coin in coin_hit_list:
@@ -145,12 +147,7 @@ class GameView(arcade.Window):
         self.clear()
 
         self.camera.use()
-
-        self.player_list.draw()
-        self.platform_list.draw()
-        self.wall_list.draw()
-        self.coin_list.draw()
+        self.scene.draw()
 
         self.gui_camera.use()
-
         self.score_text.draw()
